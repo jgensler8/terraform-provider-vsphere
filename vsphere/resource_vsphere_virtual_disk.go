@@ -5,13 +5,14 @@ import (
 	"log"
 
 	"errors"
+	"path"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
-	"path"
 )
 
 type virtualDisk struct {
@@ -63,7 +64,7 @@ func resourceVSphereVirtualDisk() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "ide",
+				Default:  "lsiLogic",
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
 					if value != "ide" && value != "busLogic" && value != "lsiLogic" {
@@ -91,7 +92,7 @@ func resourceVSphereVirtualDisk() *schema.Resource {
 
 func resourceVSphereVirtualDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] Creating Virtual Disk")
-	client := meta.(*govmomi.Client)
+	client := meta.(*VSphereClient).vimClient
 
 	vDisk := virtualDisk{
 		size: d.Get("size").(int),
@@ -143,7 +144,7 @@ func resourceVSphereVirtualDiskCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVSphereVirtualDiskRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Reading virtual disk.")
-	client := meta.(*govmomi.Client)
+	client := meta.(*VSphereClient).vimClient
 
 	vDisk := virtualDisk{
 		size: d.Get("size").(int),
@@ -256,7 +257,7 @@ func resourceVSphereVirtualDiskRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceVSphereVirtualDiskDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*govmomi.Client)
+	client := meta.(*VSphereClient).vimClient
 
 	vDisk := virtualDisk{}
 

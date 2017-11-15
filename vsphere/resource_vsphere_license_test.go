@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/license"
 )
 
@@ -89,7 +88,7 @@ func TestAccVSphereLicenseWithLabelsOnESXiServer(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccVSpherePreLicenseBasicCheck(t)
-			testAccVspherePreLicenseESXiServerIsSetCheck(t)
+			testAccSkipIfNotEsxi(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -107,12 +106,6 @@ func testAccVspherePreLicenseESXiServerIsNotSetCheck(t *testing.T) {
 	key, err := strconv.ParseBool(os.Getenv("VSPHERE_TEST_ESXI"))
 	if err == nil && key {
 		t.Skip("VSPHERE_TEST_ESXI must not be set for this acceptance test")
-	}
-}
-func testAccVspherePreLicenseESXiServerIsSetCheck(t *testing.T) {
-	key, err := strconv.ParseBool(os.Getenv("VSPHERE_TEST_ESXI"))
-	if err != nil || !key {
-		t.Skip("VSPHERE_TEST_ESXI must be set to true for this acceptance test")
 	}
 }
 
@@ -137,7 +130,7 @@ resource "vsphere_license" "foo" {
 }
 
 func testAccVSphereLicenseDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*govmomi.Client)
+	client := testAccProvider.Meta().(*VSphereClient).vimClient
 	manager := license.NewManager(client.Client)
 	message := ""
 	for _, rs := range s.RootModule().Resources {
@@ -164,7 +157,7 @@ func testAccVSphereLicenseExists(name string) resource.TestCheckFunc {
 			return fmt.Errorf("%s key not found on the server", name)
 		}
 
-		client := testAccProvider.Meta().(*govmomi.Client)
+		client := testAccProvider.Meta().(*VSphereClient).vimClient
 		manager := license.NewManager(client.Client)
 
 		if !isKeyPresent(rs.Primary.ID, manager) {
@@ -201,7 +194,7 @@ func testAccVSphereLicenseWithLabelExists(name string) resource.TestCheckFunc {
 			return fmt.Errorf("%s key not found on the server", name)
 		}
 
-		client := testAccProvider.Meta().(*govmomi.Client)
+		client := testAccProvider.Meta().(*VSphereClient).vimClient
 		manager := license.NewManager(client.Client)
 
 		if !isKeyPresent(rs.Primary.ID, manager) {

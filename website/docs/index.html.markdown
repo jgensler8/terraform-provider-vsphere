@@ -36,6 +36,7 @@ provider "vsphere" {
 # Create a folder
 resource "vsphere_folder" "frontend" {
   path = "frontend"
+  type = "vm"
 }
 
 # Create a file
@@ -127,6 +128,9 @@ vCenter must be assigned the following privileges:
    - Interaction (all)
    - Inventory (all)
    - Provisioning (all)
+
+* vCenter Inventory Service
+   - vCenter Inventory Service Tagging (all)
 
 * License 
    - Add License

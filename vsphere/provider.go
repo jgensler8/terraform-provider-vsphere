@@ -2,10 +2,15 @@ package vsphere
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
+
+// defaultAPITimeout is a default timeout value that is passed to functions
+// requiring contexts, and other various waiters.
+const defaultAPITimeout = time.Minute * 5
 
 // Provider returns a terraform.ResourceProvider.
 func Provider() terraform.ResourceProvider {
@@ -64,12 +69,31 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"vsphere_datacenter":      resourceVSphereDatacenter(),
-			"vsphere_file":            resourceVSphereFile(),
-			"vsphere_folder":          resourceVSphereFolder(),
-			"vsphere_virtual_disk":    resourceVSphereVirtualDisk(),
-			"vsphere_virtual_machine": resourceVSphereVirtualMachine(),
-			"vsphere_license":         resourceVSphereLicense(),
+			"vsphere_datacenter":                 resourceVSphereDatacenter(),
+			"vsphere_distributed_port_group":     resourceVSphereDistributedPortGroup(),
+			"vsphere_distributed_virtual_switch": resourceVSphereDistributedVirtualSwitch(),
+			"vsphere_file":                       resourceVSphereFile(),
+			"vsphere_folder":                     resourceVSphereFolder(),
+			"vsphere_host_port_group":            resourceVSphereHostPortGroup(),
+			"vsphere_host_virtual_switch":        resourceVSphereHostVirtualSwitch(),
+			"vsphere_license":                    resourceVSphereLicense(),
+			"vsphere_tag":                        resourceVSphereTag(),
+			"vsphere_tag_category":               resourceVSphereTagCategory(),
+			"vsphere_virtual_disk":               resourceVSphereVirtualDisk(),
+			"vsphere_virtual_machine":            resourceVSphereVirtualMachine(),
+			"vsphere_nas_datastore":              resourceVSphereNasDatastore(),
+			"vsphere_vmfs_datastore":             resourceVSphereVmfsDatastore(),
+			"vsphere_virtual_machine_snapshot":   resourceVSphereVirtualMachineSnapshot(),
+		},
+
+		DataSourcesMap: map[string]*schema.Resource{
+			"vsphere_datacenter":                 dataSourceVSphereDatacenter(),
+			"vsphere_distributed_virtual_switch": dataSourceVSphereDistributedVirtualSwitch(),
+			"vsphere_host":                       dataSourceVSphereHost(),
+			"vsphere_network":                    dataSourceVSphereNetwork(),
+			"vsphere_tag":                        dataSourceVSphereTag(),
+			"vsphere_tag_category":               dataSourceVSphereTagCategory(),
+			"vsphere_vmfs_disks":                 dataSourceVSphereVmfsDisks(),
 		},
 
 		ConfigureFunc: providerConfigure,
